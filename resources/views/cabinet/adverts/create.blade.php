@@ -2,7 +2,7 @@
 {{-- resources/views/cabinet/adverts/create.blade.php --}}
 <x-app-layout>
 
-    {{Breadcrumbs::render('adverts.create')}}
+    {{Breadcrumbs::render('cabinet.adverts.create')}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">{{ __("Yangi e'lon") }}</h2>
     </x-slot>

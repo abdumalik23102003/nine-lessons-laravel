@@ -31,6 +31,14 @@
             <main>
                 {{ $slot }}
             </main>
+
+            <footer class="mt-12 border-t border-gray-200 dark:border-gray-700 py-6">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
+                    @foreach (\App\Models\Page::query()->inMenu()->orderBy('title')->get() as $footerPage)
+                        <a href="{{ route('pages.show', $footerPage) }}" class="hover:text-gray-700 dark:hover:text-gray-300">{{ $footerPage->getMenuTitle() }}</a>
+                    @endforeach
+                </div>
+            </footer>
         </div>
     </body>
 </html>

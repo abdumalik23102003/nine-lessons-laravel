@@ -12,7 +12,7 @@ class FavoriteController extends Controller
 {
     public function index(Request $request): View
     {
-        return view('cabinet.favorite.index', [
+        return view('cabinet.favorites.index', [
             'adverts' => $request->user()
             ->favoriteAdverts()
             ->with(['category', 'region', 'photos'])
@@ -25,7 +25,7 @@ class FavoriteController extends Controller
     {
         $user = $request->user();
         if ($user->hasFavorited($advert)) {
-            $user->removeFavorite()->detach($advert);
+            $user->favoriteAdverts()->detach($advert);
         } else {
             $user->favoriteAdverts()->attach($advert);
         }

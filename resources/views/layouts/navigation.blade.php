@@ -29,9 +29,15 @@
                             {{ __("Murojaatlar") }}
                         </x-nav-link>
 
+                        <x-nav-link :href="route('cabinet.favorites.index')" :active="request()->routeIs('cabinet.favorites.*')">
+                            {{ __("Sevimlilar") }}
+                        </x-nav-link>
+
                         <x-nav-link :href="route('cabinet.banners.index')" :active="request()->routeIs('cabinet.banners.*')">
                             {{ __("Bannerlarim") }}
                         </x-nav-link>
+
+                        <x-dropdown-link :href="route('admin.pages.index')">{{ __('Sahifalar') }}</x-dropdown-link>
 
                         @if (auth()->user()->canModerate())
                             <x-dropdown align="left" width="56">
@@ -149,6 +155,9 @@
                     <x-responsive-nav-link :href="route('admin.moderation.index')" :active="request()->routeIs('admin.moderation.*')">
                         {{ __("E'lonlar moderatsiyasi") }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('cabinet.favorites.index')" :active="request()->routeIs('cabinet.favorites.*')">
+                        {{ __("Sevimlilar") }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.banners.moderation.index')" :active="request()->routeIs('admin.banners.*')">
                         {{ __('Bannerlar moderatsiyasi') }}
                     </x-responsive-nav-link>
@@ -157,6 +166,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.tickets.index')" :active="request()->routeIs('admin.tickets.*')">
                         {{ __('Murojaatlar (admin)') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.pages.index')" :active="request()->routeIs('admin.pages.*')">
+                        {{ __('Sahifalar') }}
                     </x-responsive-nav-link>
                     @if (auth()->user()->isAdmin())
                         <x-responsive-nav-link :href="route('admin.regions.index')" :active="request()->routeIs('admin.regions.*')">
