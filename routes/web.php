@@ -13,6 +13,7 @@ use App\Http\Controllers\Cabinet\Adverts\AdvertController;
 use App\Http\Controllers\Cabinet\Adverts\AttributeController;
 use App\Http\Controllers\Cabinet\Adverts\PhotoController;
 use App\Http\Controllers\Cabinet\Banners\BannerController;
+use App\Http\Controllers\Cabinet\DialogController;
 use App\Http\Controllers\Cabinet\FavoriteController;
 use App\Http\Controllers\Cabinet\TicketController;
 use App\Http\Controllers\HomeController;
@@ -45,6 +46,11 @@ Route::middleware('auth')->prefix('cabinet')->name('cabinet.')->group(function (
     Route::delete('adverts/{advert}/photos/{photo}', [PhotoController::class, 'destroy'])->name('adverts.photos.destroy');
     Route::put('adverts/{advert}/attributes', [AttributeController::class, 'update'])->name('adverts.attributes.update');
     Route::post('adverts/{advert}/send-to-moderation', [AdvertController::class, 'sendToModeration'])->name('adverts.send-to-moderation');
+
+    Route::get('dialogs', [DialogController::class, 'index'])->name('dialogs.index');
+    Route::get('dialogs/{dialog}', [DialogController::class, 'show'])->name('dialogs.show');
+    Route::post('dialogs/{dialog}/messages', [DialogController::class, 'addMessage'])->name('dialogs.messages.store');
+    Route::post('adverts/{advert}/dialogs', [DialogController::class, 'start'])->name('dialogs.start');
 
     Route::resource('tickets', TicketController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('tickets/{ticket}/messages', [TicketController::class, 'addMessage'])->name('tickets.messages.store');

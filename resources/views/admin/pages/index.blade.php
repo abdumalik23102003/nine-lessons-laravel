@@ -1,3 +1,4 @@
+@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -7,7 +8,7 @@
             </a>
         </div>
     </x-slot>
-
+    {{ Breadcrumbs::render('admin.pages.index') }}
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-4">
 
@@ -28,17 +29,24 @@
                             <td class="px-4 py-2 text-gray-500">{{ $page->slug }}</td>
                             <td class="px-4 py-2 text-gray-500">{{ $page->show_in_menu ? __('Ha') : __('Yo\'q') }}</td>
                             <td class="px-4 py-2 text-right whitespace-nowrap">
-                                <a href="{{ route('pages.show', $page) }}" target="_blank" class="text-gray-500 text-sm">{{ __('Ko\'rish') }}</a>
-                                <a href="{{ route('admin.pages.edit', $page) }}" class="text-indigo-600 text-sm ml-3">{{ __('Tahrirlash') }}</a>
-                                <form method="POST" action="{{ route('admin.pages.destroy', $page) }}" class="inline" onsubmit="return confirm('{{ __("O'chirilsinmi?") }}');">
+                                <a href="{{ route('pages.show', $page) }}" target="_blank"
+                                   class="text-gray-500 text-sm">{{ __('Ko\'rish') }}</a>
+                                <a href="{{ route('admin.pages.edit', $page) }}"
+                                   class="text-indigo-600 text-sm ml-3">{{ __('Tahrirlash') }}</a>
+                                <form method="POST" action="{{ route('admin.pages.destroy', $page) }}" class="inline"
+                                      onsubmit="return confirm('{{ __("O'chirilsinmi?") }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 text-sm ml-3">{{ __("O'chirish") }}</button>
+                                    <button type="submit"
+                                            class="text-red-600 text-sm ml-3">{{ __("O'chirish") }}</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">{{ __('Sahifalar yo\'q.') }}</td></tr>
+                        <tr>
+                            <td colspan="4"
+                                class="px-4 py-6 text-center text-gray-500">{{ __('Sahifalar yo\'q.') }}</td>
+                        </tr>
                     @endforelse
                     </tbody>
                 </table>

@@ -1,7 +1,10 @@
+@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">{{ __("E'lonni tahrirlash") }}</h2>
     </x-slot>
+
+    {{ Breadcrumbs::render('cabinet.adverts.edit', $advert) }}
 
     <div class="py-12" x-data="{ tab: 'main' }">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
@@ -36,7 +39,8 @@
 
                 {{-- edit.blade.php, "Asosiy" tab div ichida, </form>dan keyin --}}
                 @if ($advert->reject_reason)
-                    <div class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-700 dark:text-red-300">
+                    <div
+                        class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-700 dark:text-red-300">
                         <strong>{{ __('Rad etildi') }}:</strong> {{ $advert->reject_reason }}
                     </div>
                 @endif

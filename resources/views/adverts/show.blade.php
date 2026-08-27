@@ -1,18 +1,29 @@
+@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">{{ $advert->title }}</h2>
             @auth
+                @if (auth()->id() !== $advert->user_id)
+                    <form method="POST" action="{{ route('cabinet.dialogs.start', $advert) }}">
+                        @csrf
+                        <x-secondary-button type="submit">{{ __("✉ Sotuvchiga yozish") }}</x-secondary-button>
+                    </form>
+                @endif
+
                 <form method="POST" action="{{ route('cabinet.favorites.toggle', $advert) }}">
                     @csrf
                     @php $isFavorited = auth()->user()->hasFavorited($advert); @endphp
-                    <button type="submit" class="text-sm px-3 py-1.5 rounded-md border {{ $isFavorited ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800' : 'border-gray-300 text-gray-600 dark:text-gray-300' }}">
+                    <button type="submit"
+                            class="text-sm px-3 py-1.5 rounded-md border {{ $isFavorited ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800' : 'border-gray-300 text-gray-600 dark:text-gray-300' }}">
                         {{ $isFavorited ? '♥ ' . __('Sevimlilarda') : '♡ ' . __('Sevimlilarga qo\'shish') }}
                     </button>
                 </form>
             @endauth
         </div>
     </x-slot>
+
+    {{ Breadcrumbs::render('adverts.show', $advert) }}
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-4">
@@ -29,7 +40,9 @@
                 <div class="text-2xl font-semibold mb-2">{{ $advert->price }}</div>
                 <div class="text-sm text-gray-500 mb-4">
                     {{ $advert->category->name }}
-                    @if ($advert->region) · {{ $advert->region->getAddress() }} @endif
+                    @if ($advert->region)
+                        · {{ $advert->region->getAddress() }}
+                    @endif
                 </div>
                 <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $advert->content }}</p>
 

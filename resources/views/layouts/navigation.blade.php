@@ -37,6 +37,9 @@
                             {{ __("Bannerlarim") }}
                         </x-nav-link>
 
+                        <x-nav-link :href="route('cabinet.dialogs.index')" :active="request()->routeIs('cabinet.dialogs.*')">
+                            {{ __("Xabarlar") }}
+                        </x-nav-link>
                         <x-dropdown-link :href="route('admin.pages.index')">{{ __('Sahifalar') }}</x-dropdown-link>
 
                         @if (auth()->user()->canModerate())

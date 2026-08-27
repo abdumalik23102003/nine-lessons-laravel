@@ -1,3 +1,4 @@
+@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -7,15 +8,17 @@
             </a>
         </div>
     </x-slot>
-
+    {{ Breadcrumbs::render('admin.regions.index') }}
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-4">
 
             @if (session('status'))
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300">{{ session('status') }}</div>
+                <div
+                    class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300">{{ session('status') }}</div>
             @endif
             @if (session('error'))
-                <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-4 text-sm text-red-600">{{ session('error') }}</div>
+                <div
+                    class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-4 text-sm text-red-600">{{ session('error') }}</div>
             @endif
 
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
@@ -35,16 +38,21 @@
                             <td class="px-4 py-2 text-gray-500">{{ $region->parent?->name ?? '—' }}</td>
                             <td class="px-4 py-2 text-gray-500">{{ $region->slug }}</td>
                             <td class="px-4 py-2 text-right whitespace-nowrap">
-                                <a href="{{ route('admin.regions.edit', $region) }}" class="text-indigo-600 text-sm">{{ __('Tahrirlash') }}</a>
-                                <form method="POST" action="{{ route('admin.regions.destroy', $region) }}" class="inline" onsubmit="return confirm('{{ __("O'chirilsinmi?") }}');">
+                                <a href="{{ route('admin.regions.edit', $region) }}"
+                                   class="text-indigo-600 text-sm">{{ __('Tahrirlash') }}</a>
+                                <form method="POST" action="{{ route('admin.regions.destroy', $region) }}"
+                                      class="inline" onsubmit="return confirm('{{ __("O'chirilsinmi?") }}');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 text-sm ml-3">{{ __("O'chirish") }}</button>
+                                    <button type="submit"
+                                            class="text-red-600 text-sm ml-3">{{ __("O'chirish") }}</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">{{ __('Hududlar yo\'q.') }}</td></tr>
+                        <tr>
+                            <td colspan="4" class="px-4 py-6 text-center text-gray-500">{{ __('Hududlar yo\'q.') }}</td>
+                        </tr>
                     @endforelse
                     </tbody>
                 </table>
