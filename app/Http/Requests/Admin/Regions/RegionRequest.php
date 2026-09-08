@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 
 class RegionRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
