@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdvertController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('categories', [CategoryController::class, 'index'])
@@ -23,4 +24,15 @@ Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
     Route::get('user', [AuthController::class, 'me'])->name('api.user');
+
+    Route::get('cabinet/adverts', [AdvertController::class, 'myAdverts'])->name('api.cabinet.adverts.index');
+    Route::post('adverts', [AdvertController::class, 'store'])->name('api.adverts.store');
+    Route::patch('adverts/{advert}', [AdvertController::class, 'update'])->name('api.adverts.update');
+    Route::delete('adverts/{advert}', [AdvertController::class, 'destroy'])->name('api.adverts.destroy');
+
+    Route::get('tickets', [TicketController::class, 'index'])->name('api.tickets.index');
+    Route::post('tickets', [TicketController::class, 'store'])->name('api.tickets.store');
+    Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('api.tickets.show');
+    Route::post('tickets/{ticket}/messages', [TicketController::class, 'addMessage'])->name('api.tickets.messages.store');
+    Route::post('tickets/{ticket}/close', [TicketController::class, 'close'])->name('api.tickets.close');
 });
