@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdvertController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\TicketController;
@@ -35,4 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('api.tickets.show');
     Route::post('tickets/{ticket}/messages', [TicketController::class, 'addMessage'])->name('api.tickets.messages.store');
     Route::post('tickets/{ticket}/close', [TicketController::class, 'close'])->name('api.tickets.close');
+
+    Route::get('cabinet/banners', [BannerController::class, 'index'])->name('api.cabinet.banners.index');
+    Route::post('banners', [BannerController::class, 'store'])->name('api.banners.store');
+    Route::post('banners/{banner}', [BannerController::class, 'update'])->name('api.banners.update');
+    Route::delete('banners/{banner}', [BannerController::class, 'destroy'])->name('api.banners.destroy');
+    Route::post('banners/{banner}/send-to-moderation', [BannerController::class, 'sendToModeration'])->name('api.banners.send-to-moderation');
 });

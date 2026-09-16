@@ -1,4 +1,4 @@
-@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
+@php use App\Models\Advert;use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">{{ __("E'lonni tahrirlash") }}</h2>
@@ -47,7 +47,7 @@
 
                 <div class="mt-4 pt-4 border-t flex items-center justify-between">
                     <span class="text-sm text-gray-500">
-                        {{ __('Status') }}: {{ \App\Models\Advert::statusesList()[$advert->status] }}
+                        {{ __('Status') }}: {{ Advert::statusesList()[$advert->status] }}
                     </span>
 
                     @if ($advert->isDraft())
@@ -60,25 +60,35 @@
             </div>
 
             <div x-show="tab === 'photos'" class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6">
-                <div class="grid grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
                     @foreach ($advert->photos as $photo)
-                        <div class="relative">
-                            <img src="{{ $photo->getFileUrl() }}" class="rounded-md w-full h-24 object-cover">
+                        <div class="relative group">
+                            <img src="{{ $photo->getFileUrl() }}" class="rounded-md w-full h-24 object-cover" alt="rasm">
+
                             <form method="POST"
                                   action="{{ route('cabinet.adverts.photos.destroy', [$advert, $photo]) }}"
                                   class="absolute top-1 right-1">
-                                @csrf @method('DELETE')
-                                <button class="bg-white/80 rounded-full w-6 h-6 text-red-600 text-xs">×</button>
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow transition-colors"
+                                        title="{{ __('O\'chirish') }}">
+                                    &times;
+                                </button>
                             </form>
                         </div>
                     @endforeach
                 </div>
 
-                <form method="POST" action="{{ route('cabinet.adverts.photos.store', $advert) }}"
-                      enctype="multipart/form-data">
+                <form method="POST" action="{{ route('cabinet.adverts.photos.store', $advert) }}" enctype="multipart/form-data" class="mt-4 border-t pt-4">
                     @csrf
-                    <input type="file" name="file" accept="image/*">
-                    <x-primary-button class="mt-2">{{ __('Yuklash') }}</x-primary-button>
+                    <div>
+                        <x-input-label for="photo_file" :value="__('Yangi rasm tanlang')" class="mb-2" />
+                        <input id="photo_file" type="file" name="file" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-300">
+                        <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                    </div>
+
+                    <x-primary-button class="mt-4">{{ __('Yuklash') }}</x-primary-button>
                 </form>
             </div>
 
