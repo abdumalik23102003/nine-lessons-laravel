@@ -4,6 +4,9 @@ use App\Http\Controllers\Api\AdvertController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DialogController;
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +19,9 @@ Route::get('regions', [RegionController::class, 'index'])->name('api.regions.ind
 Route::get('adverts', [AdvertController::class, 'index'])->name('api.adverts.index');
 
 Route::get('adverts/{advert}', [AdvertController::class, 'show'])->name('api.adverts.show');
+
+Route::get('pages', [PageController::class, 'index'])->name('api.pages.index');
+Route::get('pages/{page:slug}', [PageController::class, 'show'])->name('api.pages.show');
 
 // Ochiq (token talab qilmaydi) — hozircha hech kim emasman, token so'rayapman.
 Route::post('register', [AuthController::class, 'register'])->name('api.register');
@@ -42,4 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('banners/{banner}', [BannerController::class, 'update'])->name('api.banners.update');
     Route::delete('banners/{banner}', [BannerController::class, 'destroy'])->name('api.banners.destroy');
     Route::post('banners/{banner}/send-to-moderation', [BannerController::class, 'sendToModeration'])->name('api.banners.send-to-moderation');
+
+    Route::get('favorites', [FavoriteController::class, 'index'])->name('api.favorites.index');
+    Route::post('adverts/{advert}/favorite', [FavoriteController::class, 'toggle'])->name('api.favorites.toggle');
+
+    Route::get('dialogs', [DialogController::class, 'index'])->name('api.dialogs.index');
+    Route::get('dialogs/{dialog}', [DialogController::class, 'show'])->name('api.dialogs.show');
+    Route::post('dialogs/{dialog}/messages', [DialogController::class, 'addMessage'])->name('api.dialogs.messages.store');
+    Route::post('adverts/{advert}/dialogs', [DialogController::class, 'start'])->name('api.dialogs.start');
 });
