@@ -58,13 +58,16 @@ class Dialog extends Model
         }
     }
 
-    public function unreadCountFor(int $userId): int
+    public function unreadCountFor(?int $userId): int
     {
+        if ($userId === null) {
+            return 0;
+        }
         if ($this->isOwner($userId)) {
-            return $this->user_new_messages;
+            return (int) $this->user_new_messages;
         }
         if ($this->client_id === $userId) {
-            return $this->client_new_messages;
+            return (int) $this->client_new_messages;
         }
 
         return 0;

@@ -7,11 +7,9 @@ use App\Http\Requests\Cabinet\Banners\BannerRequest;
 use App\Http\Resources\BannerResource;
 use App\Models\Banner;
 use DomainException;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BannerController extends Controller
@@ -35,23 +33,19 @@ class BannerController extends Controller
 
         $banner = Banner::create($data);
 
-//        return (new BannerResource($banner))->response()->setStatusCode(201);
-//        return response(new BannerResource($banner), 201);
-        return response()->json(new BannerResource($banner), 201);
+        return (new BannerResource($banner))->response()->setStatusCode(201);
     }
 
     public function update(BannerRequest $request, Banner $banner): BannerResource
     {
-        try {
-            $this->authorize('update', $banner);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage());
-        }
+        $this->authorize('update', $banner);
+        
         $data = $request->validated();
+        
         if ($request->hasFile('file')) {
             Storage::disk('public')->delete($banner->file);
+            $data['file'] = $request->file('file')->store('banners/' . now()->format('y/m/d'), 'public');
         }
-        $data['file'] = $request->file('file')->store('banners/' . now()->format('y/m/d'), 'public');
 
         $banner->update($data);
 
@@ -60,11 +54,7 @@ class BannerController extends Controller
 
     public function destroy(Banner $banner): JsonResponse
     {
-        try {
-            $this->authorize('update', $banner);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage());
-        }
+        $this->authorize('update', $banner);
 
         if ($banner->file) {
             Storage::disk('public')->delete($banner->file);
@@ -75,11 +65,7 @@ class BannerController extends Controller
 
     public function sendToModeration(Banner $banner): BannerResource|JsonResponse
     {
-        try {
-            $this->authorize('update', $banner);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage());
-        }
+        $this->authorize('update', $banner);
 
         try {
             $banner->sendToModeration();

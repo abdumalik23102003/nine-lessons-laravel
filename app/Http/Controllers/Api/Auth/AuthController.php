@@ -46,7 +46,11 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->tokens()->delete();
+        
+        // Force forget all guards for subsequent requests
+        auth()->forgetGuards();
 
         return response()->json(status: 204);
     }

@@ -7,11 +7,9 @@ use App\Http\Requests\Dialogs\DialogMessageRequest;
 use App\Http\Resources\DialogResource;
 use App\Models\Advert;
 use App\Models\Dialog;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Log;
 
 class DialogController extends Controller
 {
@@ -27,11 +25,7 @@ class DialogController extends Controller
 
     public function show(Request $request, Dialog $dialog): DialogResource
     {
-        try {
-            $this->authorize('view', $dialog);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage());
-        }
+        $this->authorize('view', $dialog);
 
         $dialog->readBy($request->user()->id);
 
@@ -55,11 +49,7 @@ class DialogController extends Controller
 
     public function addMessage(DialogMessageRequest $request, Dialog $dialog): JsonResponse
     {
-        try {
-            $this->authorize('view', $dialog);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage());
-        }
+        $this->authorize('view', $dialog);
 
         $dialog->addMessage($request->user()->id, $request->validated('message'));
 
