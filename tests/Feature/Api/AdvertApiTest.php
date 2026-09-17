@@ -1,10 +1,13 @@
 <?php
 
 use App\Models\Advert;
+use App\Models\Category;
 use App\Models\Photo;
+use App\Models\User;
 use App\Services\Search\AdvertIndexer;
 use App\Services\Search\AdvertSearchService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Laravel\Sanctum\Sanctum;
 
 beforeEach(function () {
     // Advert::factory()->create() fires AdvertObserver -> IndexAdvertJob,
@@ -68,4 +71,103 @@ test('show returns 403 for a draft advert', function () {
 test('show returns 404 for a non-existent advert', function () {
     $this->getJson('/api/adverts/999999')
         ->assertNotFound();
+});
+
+test('guests cannot access their own adverts list', function () {
+    $this->getJson(route('api.cabinet.adverts.index'))
+        ->assertUnauthorized();
+});
+
+test('my adverts only returns the authenticated users adverts', function () {
+    $user = User::factory()->create();
+    $stranger = User::factory()->create();
+
+    Advert::factory()->for($user)->create(['title' => 'Mening e\'lonim']);
+    Advert::factory()->for($stranger)->create(['title' => 'Boshqaning e\'loni']);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->getJson(route('api.cabinet.adverts.index'));
+
+    $response
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.title', 'Mening e\'lonim');
+});
+
+test('an authenticated user can create an advert', function () {
+    $user = User::factory()->create();
+    $category = Category::factory()->create();
+
+    Sanctum::actingAs($user);
+
+    $response = $this->postJson(route('api.adverts.store'), [
+        'category_id' => $category->id,
+        'title' => 'Yangi e\'lon',
+        'price' => 150000,
+        'address' => 'Toshkent',
+        'content' => 'Tavsif',
+    ]);
+
+    $response
+        ->assertCreated()
+        ->assertJsonPath('data.title', 'Yangi e\'lon');
+
+    expect(Advert::query()->where('user_id', $user->id)->where('title', 'Yangi e\'lon')->exists())->toBeTrue();
+});
+
+test('creating an advert without a title fails validation', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $this->postJson(route('api.adverts.store'), [])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['category_id', 'title', 'price', 'address', 'content']);
+});
+
+test('an owner can update their own advert', function () {
+    $user = User::factory()->create();
+    $advert = Advert::factory()->for($user)->create(['title' => 'Eski nom']);
+    $category = Category::factory()->create();
+
+    Sanctum::actingAs($user);
+
+    $response = $this->patchJson(route('api.adverts.update', $advert), [
+        'category_id' => $category->id,
+        'title' => 'Yangilangan nom',
+        'price' => 200000,
+        'address' => 'Samarqand',
+        'content' => 'Yangi tavsif',
+    ]);
+
+    $response->assertOk()->assertJsonPath('data.title', 'Yangilangan nom');
+});
+
+test('a stranger cannot update someone elses advert', function () {
+    $owner = User::factory()->create();
+    $stranger = User::factory()->create();
+    $advert = Advert::factory()->for($owner)->create();
+    $category = Category::factory()->create();
+
+    Sanctum::actingAs($stranger);
+
+    $this->patchJson(route('api.adverts.update', $advert), [
+        'category_id' => $category->id,
+        'title' => 'Hack',
+        'price' => 1,
+        'address' => 'x',
+        'content' => 'x',
+    ])->assertForbidden();
+});
+
+test('an owner can delete their own advert', function () {
+    $user = User::factory()->create();
+    $advert = Advert::factory()->for($user)->create();
+
+    Sanctum::actingAs($user);
+
+    $this->deleteJson(route('api.adverts.destroy', $advert))
+        ->assertStatus(204);
+
+    expect(Advert::query()->find($advert->id))->toBeNull();
 });
