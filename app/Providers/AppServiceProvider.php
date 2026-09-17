@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Advert;
+use App\Models\Photo;
 use App\Observers\AdvertObserver;
+use App\Policies\PhotoPolicy;
 use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Photo::class, PhotoPolicy::class);
+        
         Advert::observe(AdvertObserver::class);
     }
 }

@@ -14,6 +14,7 @@ class AdvertResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'price' => $this->price,
+            'status' => $this->status,
             'category' => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,
@@ -22,9 +23,21 @@ class AdvertResource extends JsonResource
                 'id' => $this->region->id,
                 'name' => $this->region->name,
             ] : null,
-            'photos' => $this->photos->map(fn($photo) => $photo->getFileUrl())->all(),
+            'photos' => PhotoResource::collection($this->whenLoaded('photos')),
+            'attributes' => $this->attributeValues(),
             'published_at' => $this->published_at?->toIso8601String(),
             'expires_at' => $this->expires_at?->toIso8601String(),
         ];
+    }
+
+    private function attributeValues(): array
+    {
+        return $this->values->map(function ($value) {
+            return [
+                'attribute_id' => $value->attribute_id,
+                'attribute_name' => $value->attribute?->name,
+                'value' => $value->value,
+            ];
+        })->all();
     }
 }

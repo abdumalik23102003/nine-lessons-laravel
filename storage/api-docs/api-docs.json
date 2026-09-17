@@ -1,0 +1,29 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Nine Lessons API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/adverts": {
+            "get": {
+                "tags": [
+                    "Adverts"
+                ],
+                "summary": "Get adverts",
+                "operationId": "62c006cd0c1cb2217aa4e25893df0953",
+                "responses": {
+                    "200": {
+                        "description": "List of adverts"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Adverts",
+            "description": "Adverts"
+        }
+    ]
+}

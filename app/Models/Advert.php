@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\AdvertModerationApprovedNotification;
+use App\Notifications\AdvertRejectedNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -59,6 +61,9 @@ class Advert extends Model
             'published_at' => now(),
             'expires_at' => $date,
         ]);
+        
+        // Send notification to user
+        $this->user->notify(new AdvertModerationApprovedNotification($this));
     }
 
     public function reject(string $reason): void
@@ -70,6 +75,9 @@ class Advert extends Model
             'status' => self::STATUS_DRAFT,
             'reject_reason' => $reason,
         ]);
+        
+        // Send notification to user
+        $this->user->notify(new AdvertRejectedNotification($this, $reason));
     }
 
     public function close(): void

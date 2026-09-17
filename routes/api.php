@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\AdvertController;
+use App\Http\Controllers\Api\AdvertPhotoController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DialogController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\TicketController;
@@ -31,11 +33,21 @@ Route::post('login', [AuthController::class, 'login'])->name('api.login');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
     Route::get('user', [AuthController::class, 'me'])->name('api.user');
+    Route::put('user', [AuthController::class, 'update'])->name('api.user.update');
+
+    Route::get('notifications', [NotificationController::class, 'index'])->name('api.notifications.index');
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('api.notifications.read');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('api.notifications.read-all');
 
     Route::get('cabinet/adverts', [AdvertController::class, 'myAdverts'])->name('api.cabinet.adverts.index');
     Route::post('adverts', [AdvertController::class, 'store'])->name('api.adverts.store');
     Route::patch('adverts/{advert}', [AdvertController::class, 'update'])->name('api.adverts.update');
     Route::delete('adverts/{advert}', [AdvertController::class, 'destroy'])->name('api.adverts.destroy');
+    Route::post('adverts/{advert}/send-to-moderation', [AdvertController::class, 'sendToModeration'])->name('api.adverts.send-to-moderation');
+    Route::post('adverts/{advert}/close', [AdvertController::class, 'close'])->name('api.adverts.close');
+    
+    Route::post('adverts/{advert}/photos', [AdvertPhotoController::class, 'store'])->name('api.adverts.photos.store');
+    Route::delete('adverts/{advert}/photos/{photo}', [AdvertPhotoController::class, 'destroy'])->name('api.adverts.photos.destroy');
 
     Route::get('tickets', [TicketController::class, 'index'])->name('api.tickets.index');
     Route::post('tickets', [TicketController::class, 'store'])->name('api.tickets.store');

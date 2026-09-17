@@ -47,6 +47,25 @@ class AdvertSearchService
             $must[] = ['range' => ['price' => ['lte' => $priceTo]]];
         }
 
+        // Attributes filter
+        if ($attributes = $request->array('attributes')) {
+            foreach ($attributes as $attr) {
+                $must[] = [
+                    'nested' => [
+                        'path' => 'values',
+                        'query' => [
+                            'bool' => [
+                                'must' => [
+                                    ['term' => ['values.attribute' => $attr['id']]],
+                                    ['match' => ['values.value_string' => $attr['value']]],
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+            }
+        }
+
         $sort = $request->string('sort')->toString();
 
         $sortClause = match ($sort) {
@@ -66,6 +85,20 @@ class AdvertSearchService
                 'query' => [
                     'bool' => ['must' => $must],
                 ],
+                'aggs' => [
+                    'categories' => [
+                        'terms' => [
+                            'field' => 'categories',
+                            'size' => 100,
+                        ],
+                    ],
+                    'regions' => [
+                        'terms' => [
+                            'field' => 'regions',
+                            'size' => 100,
+                        ],
+                    ],
+                ],
             ],
         ])->asArray();
 
@@ -76,12 +109,12 @@ class AdvertSearchService
             return new Paginator([], $total, $perPage, $page);
         }
 
-        $items = Advert::with(['category', 'region', 'photos'])
+        $items = Advert::with(['category', 'region', 'photos', 'values.attribute'])
             ->whereIn('id', $ids)
-            ->orderByRaw('FIELD(id,' . implode(',', $ids) . ')')
-            ->get();
+            ->get()
+            ->sortBy(fn($item) => array_search($item->id, $ids));
 
-        return new Paginator($items, $total, $perPage, $page, [
+        return new Paginator($items->values(), $total, $perPage, $page, [
             'path' => $request->url(),
             'query' => $request->query(),
         ]);

@@ -20,6 +20,9 @@ class SearchRequest extends FormRequest
             'price_from' => ['nullable', 'integer', 'min:0'],
             'price_to' => ['nullable', 'integer', 'min:0'],
             'sort' => ['nullable', 'string', 'in:newest,price_asc,price_desc'],
+            'attributes' => ['nullable', 'array'],
+            'attributes.*.id' => ['integer', 'exists:attributes,id'],
+            'attributes.*.value' => ['string', 'max:255'],
         ];
     }
 }
