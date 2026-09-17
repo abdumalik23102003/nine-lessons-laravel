@@ -6,24 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('notifiable');
+            $table->uuid('id')->primary();        // ✅ UUID (Laravel default)
             $table->string('type');
+            $table->morphs('notifiable');          // ✅ integer ID uchun to'g'ri
             $table->text('data');
-            $table->dateTime('read_at')->nullable();
+            $table->timestamp('read_at')->nullable(); // ✅ timestamp (dateTime emas)
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('notifications');
