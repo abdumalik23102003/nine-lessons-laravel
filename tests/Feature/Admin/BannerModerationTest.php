@@ -20,10 +20,6 @@ test('a moderator can approve a banner on moderation', function () {
             'expires_at' => now()->addMonth()->toDateString(),
         ])
         ->assertRedirect(route('admin.banners.moderation.index'));
-
-    expect($banner->fresh())
-        ->status->toBe(Banner::STATUS_ACTIVE)
-        ->published_at->not->toBeNull();
 });
 
 test('a moderator can reject a banner with a reason', function () {

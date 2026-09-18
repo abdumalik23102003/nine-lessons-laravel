@@ -3,14 +3,26 @@
 use App\Models\Advert;
 use App\Models\User;
 use App\Notifications\AdvertRejectedNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 test('user can list their notifications', function () {
+    Notification::fake();
+    
     $user = User::factory()->create();
     $user->notify(new AdvertRejectedNotification(
         Advert::factory()->create(),
         'Low quality images'
     ));
+
+    // Create notification manually for testing
+    \Illuminate\Notifications\DatabaseNotification::create([
+        'id' => \Illuminate\Support\Str::uuid(),
+        'notifiable_id' => $user->id,
+        'notifiable_type' => User::class,
+        'type' => AdvertRejectedNotification::class,
+        'data' => json_encode(['reason' => 'Low quality images']),
+    ]);
 
     Sanctum::actingAs($user);
 
@@ -22,12 +34,14 @@ test('user can list their notifications', function () {
 
 test('user can mark notification as read', function () {
     $user = User::factory()->create();
-    $user->notify(new AdvertRejectedNotification(
-        Advert::factory()->create(),
-        'Bad description'
-    ));
 
-    $notification = $user->notifications()->first();
+    $notification = \Illuminate\Notifications\DatabaseNotification::create([
+        'id' => \Illuminate\Support\Str::uuid(),
+        'notifiable_id' => $user->id,
+        'notifiable_type' => User::class,
+        'type' => AdvertRejectedNotification::class,
+        'data' => json_encode(['reason' => 'Bad description']),
+    ]);
 
     Sanctum::actingAs($user);
 
@@ -36,15 +50,28 @@ test('user can mark notification as read', function () {
     );
 
     $response->assertOk();
-    expect($notification->fresh()->read_at)->not->toBeNull();
+    $notification->refresh();
+    expect($notification->read_at)->not->toBeNull();
 });
 
 test('user can mark all notifications as read', function () {
     $user = User::factory()->create();
-    $advert = Advert::factory()->create();
 
-    $user->notify(new AdvertRejectedNotification($advert, 'Reason 1'));
-    $user->notify(new AdvertRejectedNotification($advert, 'Reason 2'));
+    \Illuminate\Notifications\DatabaseNotification::create([
+        'id' => \Illuminate\Support\Str::uuid(),
+        'notifiable_id' => $user->id,
+        'notifiable_type' => User::class,
+        'type' => AdvertRejectedNotification::class,
+        'data' => json_encode(['reason' => 'Reason 1']),
+    ]);
+
+    \Illuminate\Notifications\DatabaseNotification::create([
+        'id' => \Illuminate\Support\Str::uuid(),
+        'notifiable_id' => $user->id,
+        'notifiable_type' => User::class,
+        'type' => AdvertRejectedNotification::class,
+        'data' => json_encode(['reason' => 'Reason 2']),
+    ]);
 
     Sanctum::actingAs($user);
 

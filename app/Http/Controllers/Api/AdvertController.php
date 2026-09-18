@@ -7,6 +7,7 @@ use App\Http\Requests\Adverts\SearchRequest;
 use App\Http\Requests\Cabinet\Adverts\AdvertRequest;
 use App\Http\Resources\AdvertResource;
 use App\Models\Advert;
+use App\Services\AdvertService;
 use App\Services\Search\AdvertSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,17 +16,6 @@ use OpenApi\Attributes as OA;
 
 class AdvertController extends Controller
 {
-    #[OA\Get(
-        path: '/api/adverts',
-        summary: 'Get adverts',
-        tags: ['Adverts'],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'List of adverts'
-            )
-        ]
-    )]
     public function index(SearchRequest $request, AdvertSearchService $service): AnonymousResourceCollection
     {
         $adverts = $service->search($request);
@@ -48,65 +38,39 @@ class AdvertController extends Controller
         return AdvertResource::collection($adverts);
     }
 
-    public function store(AdvertRequest $request): JsonResponse
+    public function store(AdvertRequest $request, AdvertService $service): JsonResponse
     {
-        $advert = Advert::create([
-            ...$request->validated(),
-            'user_id' => $request->user()->id,
-        ]);
+        $advert = $service->create($request->user(), $request->validated());
+        $advert->load(['category', 'region', 'photos', 'values.attribute']);
 
-        return (new AdvertResource($advert->load(['category', 'region', 'photos', 'values.attribute'])))
+        return (new AdvertResource($advert))
             ->response()
             ->setStatusCode(201);
     }
 
-    public function update(AdvertRequest $request, Advert $advert): AdvertResource
+    public function update(AdvertRequest $request, Advert $advert, AdvertService $service): AdvertResource
     {
         $this->authorize('update', $advert);
+        $service->update($advert, $request->validated());
+        $advert->load(['category', 'region', 'photos', 'values.attribute']);
 
-        $advert->update($request->validated());
-
-        return new AdvertResource($advert->load(['category', 'region', 'photos', 'values.attribute']));
+        return new AdvertResource($advert);
     }
 
-    public function destroy(Advert $advert): JsonResponse
+    public function destroy(Advert $advert, AdvertService $service): JsonResponse
     {
         $this->authorize('update', $advert);
-
-        $advert->delete();
+        $service->delete($advert);
 
         return response()->json(status: 204);
     }
 
-    #[OA\Post(
-        path: '/api/adverts/{advert}/send-to-moderation',
-        summary: 'Send advert to moderation',
-        tags: ['Adverts'],
-        parameters: [
-            new OA\Parameter(
-                name: 'advert',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(type: 'integer')
-            ),
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Advert sent to moderation'
-            ),
-            new OA\Response(
-                response: 422,
-                description: 'Invalid request'
-            ),
-        ]
-    )]
-    public function sendToModeration(Advert $advert)
+    public function sendToModeration(Advert $advert, AdvertService $service)
     {
         $this->authorize('update', $advert);
 
         try {
-            $advert->sendToModeration();
+            $advert = $service->sendToModeration($advert);
         } catch (\DomainException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -114,35 +78,12 @@ class AdvertController extends Controller
         return new AdvertResource($advert->load(['category', 'region', 'photos', 'values.attribute']));
     }
 
-    #[OA\Post(
-        path: '/api/adverts/{advert}/close',
-        summary: 'Close advert',
-        tags: ['Adverts'],
-        parameters: [
-            new OA\Parameter(
-                name: 'advert',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(type: 'integer')
-            ),
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Advert closed'
-            ),
-            new OA\Response(
-                response: 422,
-                description: 'Invalid request'
-            ),
-        ]
-    )]
-    public function close(Advert $advert)
+    public function close(Advert $advert, AdvertService $service)
     {
         $this->authorize('update', $advert);
 
         try {
-            $advert->close();
+            $advert = $service->close($advert);
         } catch (\DomainException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }

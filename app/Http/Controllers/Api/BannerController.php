@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Cabinet\Banners\BannerRequest;
 use App\Http\Resources\BannerResource;
 use App\Models\Banner;
+use App\Services\BannerService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,22 +22,20 @@ class BannerController extends Controller
         return BannerResource::collection($banners);
     }
 
-    public function store(BannerRequest $request): JsonResponse
+    public function store(BannerRequest $request, BannerService $service): JsonResponse
     {
         $data = $request->validated();
-        $data['user_id'] = $request->user()->id;
-        $data['status'] = Banner::STATUS_DRAFT;
 
         if ($request->hasFile('file')) {
             $data['file'] = $request->file('file')->store('banners/' . now()->format('y/m/d'), 'public');
         }
 
-        $banner = Banner::create($data);
+        $banner = $service->create($request->user(), $data);
 
         return (new BannerResource($banner))->response()->setStatusCode(201);
     }
 
-    public function update(BannerRequest $request, Banner $banner): BannerResource
+    public function update(BannerRequest $request, Banner $banner, BannerService $service): BannerResource
     {
         $this->authorize('update', $banner);
         
@@ -47,30 +46,27 @@ class BannerController extends Controller
             $data['file'] = $request->file('file')->store('banners/' . now()->format('y/m/d'), 'public');
         }
 
-        $banner->update($data);
+        $banner = $service->update($banner, $data);
 
         return new BannerResource($banner);
     }
 
-    public function destroy(Banner $banner): JsonResponse
+    public function destroy(Banner $banner, BannerService $service): JsonResponse
     {
         $this->authorize('update', $banner);
-
-        if ($banner->file) {
-            Storage::disk('public')->delete($banner->file);
-        }
-        $banner->delete();
+        $service->delete($banner);
+        
         return response()->json(status: 204);
     }
 
-    public function sendToModeration(Banner $banner): BannerResource|JsonResponse
+    public function sendToModeration(Banner $banner, BannerService $service): BannerResource|JsonResponse
     {
         $this->authorize('update', $banner);
 
         try {
-            $banner->sendToModeration();
+            $banner = $service->sendToModeration($banner);
         } catch (DomainException $e) {
-            return response()->json(['message' => e($e->getMessage())], 422);
+            return response()->json(['message' => $e->getMessage()], 422);
         }
 
         return new BannerResource($banner);

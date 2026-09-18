@@ -51,6 +51,24 @@ class Category extends Model
         return $this->parent ? [...$this->parent->ancestorIds(), $this->parent->id] : [];
     }
 
+    public function descendants()
+    {
+        $descendants = collect();
+        $collect = function (Category $cat) use (&$descendants, &$collect) {
+            foreach ($cat->children as $child) {
+                $descendants->push($child);
+                $collect($child);
+            }
+        };
+        $collect($this);
+        return $descendants;
+    }
+
+    public function descendantIds(): array
+    {
+        return $this->descendants()->pluck('id')->all();
+    }
+
     public static function tree()
     {
         $result = [];

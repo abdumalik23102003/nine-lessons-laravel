@@ -29,14 +29,22 @@ Route::get('pages/{page:slug}', [PageController::class, 'show'])->name('api.page
 Route::post('register', [AuthController::class, 'register'])->name('api.register');
 Route::post('login', [AuthController::class, 'login'])->name('api.login');
 
+// Social login routes
+Route::get('auth/{provider}/redirect', [AuthController::class, 'socialiteRedirect'])->name('api.auth.social.redirect');
+Route::get('auth/{provider}/callback', [AuthController::class, 'socialiteCallback'])->name('api.auth.social.callback');
+
 // Himoyalangan (auth:sanctum) — to'g'ri token bo'lishi shart.
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
     Route::get('user', [AuthController::class, 'me'])->name('api.user');
     Route::put('user', [AuthController::class, 'update'])->name('api.user.update');
 
-    Route::get('notifications', [NotificationController::class, 'index'])->name('api.notifications.index');
-    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('api.notifications.read');
+    Route::delete('auth/{provider}/unlink', [AuthController::class, 'unlinkNetwork'])->name('api.auth.network.unlink');
+
+    Route::post('phone/request-verification', [AuthController::class, 'requestPhoneVerification'])->name('api.phone.request-verification');
+    Route::post('phone/verify', [AuthController::class, 'verifyPhone'])->name('api.phone.verify');
+
+    Route::get('notifications', [NotificationController::class, 'index'])->name('api.notifications.index');    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('api.notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('api.notifications.read-all');
 
     Route::get('cabinet/adverts', [AdvertController::class, 'myAdverts'])->name('api.cabinet.adverts.index');

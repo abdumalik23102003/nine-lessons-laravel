@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
             'moderator' => EnsureUserCanModerate::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'admin/banners/moderation/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
