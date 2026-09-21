@@ -48,7 +48,7 @@
             <x-banner-widget :category-id="request('category_id') ?: null"/>
 
             <div class="text-sm text-gray-500 mb-3 mt-4">
-                {{ __(':total ta e\'lon topildi', ['total' => $adverts->total()]) }}
+                {{ __(':total ta e\'lon topildi', ['total' => $adverts->count()]) }}
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 @forelse ($adverts as $advert)

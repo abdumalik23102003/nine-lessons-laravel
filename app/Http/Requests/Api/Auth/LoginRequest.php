@@ -43,7 +43,17 @@ class LoginRequest extends FormRequest
                 'email' => ['Login yoki parol noto\'g\'ri.'],
             ]);
         }
+        if ($user->isSuspended() || $user->isDeleted()) {
+            throw ValidationException::withMessages([
+                'email' => ['Hisob bloklangan yoki o\'chirilgan.'],
+            ]);
+        }
 
+        if ($user->isWaiting()) {
+            throw ValidationException::withMessages([
+                'email' => ['Hisob hali faollashtirilmagan. Emailni tasdiqlang.'],
+            ]);
+        }
         RateLimiter::clear($this->throttleKey());
 
         return $user;

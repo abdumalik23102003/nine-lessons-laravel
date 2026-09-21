@@ -15,14 +15,18 @@ class NetworkService
     public function handleCallback(string $provider, SocialiteUser $providerUser): array
     {
         return DB::transaction(function () use ($provider, $providerUser) {
-            // Check if network already registered
             $network = Network::where('name', $provider)
                 ->where('network_id', $providerUser->getId())
                 ->first();
 
             if ($network) {
-                // Existing user via social
                 $user = $network->user;
+
+                // ★ suspended / deleted bloklash
+                if ($user->isSuspended() || $user->isDeleted()) {
+                    throw new \DomainException('Hisob bloklangan yoki o\'chirilgan.');
+                }
+
                 $token = $user->createToken('mobile')->plainTextToken;
 
                 return [
@@ -32,11 +36,13 @@ class NetworkService
                 ];
             }
 
-            // Check if user with this email exists
             $user = User::where('email', $providerUser->getEmail())->first();
 
             if ($user) {
-                // Link social network to existing account
+                if ($user->isSuspended() || $user->isDeleted()) {
+                    throw new \DomainException('Hisob bloklangan yoki o\'chirilgan.');
+                }
+
                 Network::fromProviderUser($user, $provider, $providerUser);
                 $token = $user->createToken('mobile')->plainTextToken;
 
@@ -47,15 +53,16 @@ class NetworkService
                 ];
             }
 
-            // Create new user
+            // ★ Yangi social user — darhol active (kursdagi kabi)
             $user = User::create([
                 'name' => $providerUser->getName() ?? 'User',
                 'email' => $providerUser->getEmail(),
                 'password' => Hash::make(Str::random(32)),
-                'status' => User::STATUS_WAIT, // New users start as waiting
+                'status' => User::STATUS_ACTIVE,
+                'activated_at' => now(),
+                'email_verified_at' => now(), // provider tasdiqlagan
             ]);
 
-            // Link social network
             Network::fromProviderUser($user, $provider, $providerUser);
 
             $token = $user->createToken('mobile')->plainTextToken;
@@ -67,7 +74,6 @@ class NetworkService
             ];
         });
     }
-
     public function unlinkNetwork(User $user, string $provider): void
     {
         $user->networks()

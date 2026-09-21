@@ -12,6 +12,7 @@
         "elasticsearch/elasticsearch": "^8.0",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.3",
+        "laravel/socialite": "^5.31",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {

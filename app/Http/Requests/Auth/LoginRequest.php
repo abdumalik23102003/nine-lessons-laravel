@@ -49,7 +49,23 @@ class LoginRequest extends FormRequest
                 'email' => trans('auth.failed'),
             ]);
         }
+        $user = Auth::user();
 
+        if ($user->isSuspended() || $user->isDeleted()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => ['Hisob bloklangan yoki o\'chirilgan.'],
+            ]);
+        }
+
+        if ($user->isWaiting()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => ['Hisob hali faollashtirilmagan. Emailni tasdiqlang.'],
+            ]);
+        }
         RateLimiter::clear($this->throttleKey());
     }
 

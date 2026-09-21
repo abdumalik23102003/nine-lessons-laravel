@@ -57,7 +57,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $user->tokens()->delete();
-        
+
         auth()->forgetGuards();
 
         return response()->json(status: 204);
@@ -118,7 +118,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $user->update(['phone' => $request->validated('phone')]);
-        
+
         $code = $user->generatePhoneVerificationToken();
         $user->notify(new PhoneVerificationCodeNotification($code));
 
@@ -145,12 +145,16 @@ class AuthController extends Controller
 
     public function socialiteRedirect(string $provider): JsonResponse
     {
-        if (!in_array($provider, self::VALID_PROVIDERS)) {
+        if (! in_array($provider, self::VALID_PROVIDERS, true)) {
             return response()->json(['message' => 'Invalid provider'], 400);
         }
 
         try {
-            $url = Socialite::driver($provider)->redirect()->getTargetUrl();
+            $url = Socialite::driver($provider)
+                ->stateless()
+                ->redirect()
+                ->getTargetUrl();
+
             return response()->json(['url' => $url]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to redirect'], 400);
@@ -159,35 +163,35 @@ class AuthController extends Controller
 
     public function socialiteCallback(string $provider, NetworkService $networkService): JsonResponse
     {
-        if (!in_array($provider, self::VALID_PROVIDERS)) {
+        if (! in_array($provider, self::VALID_PROVIDERS, true)) {
             return response()->json(['message' => 'Invalid provider'], 400);
         }
 
         try {
-            $providerUser = Socialite::driver($provider)->user();
+            $providerUser = Socialite::driver($provider)
+                ->stateless()
+                ->user();
+
+            $result = $networkService->handleCallback($provider, $providerUser);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to authenticate with provider'], 400);
         }
 
-        $result = $networkService->handleCallback($provider, $providerUser);
-        $user = $result['user'];
-        $token = $result['token'];
-        $isNew = $result['is_new'];
-
         return response()->json([
             'data' => [
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'is_new' => $isNew,
+                    'id' => $result['user']->id,
+                    'name' => $result['user']->name,
+                    'email' => $result['user']->email,
+                    'status' => $result['user']->status,
+                    'is_new' => $result['is_new'],
                 ],
-                'token' => $token,
+                'token' => $result['token'],
             ],
         ]);
     }
-
     public function unlinkNetwork(string $provider, Request $request, NetworkService $networkService): JsonResponse
     {
         if (!in_array($provider, self::VALID_PROVIDERS)) {
