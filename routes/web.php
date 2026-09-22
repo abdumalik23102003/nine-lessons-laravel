@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\Adverts\ModerationController;
 use App\Http\Controllers\Adverts\AdvertController as PublicAdvertController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\BannerClickController;
 use App\Http\Controllers\Cabinet\Adverts\AdvertController;
 use App\Http\Controllers\Cabinet\Adverts\AttributeController;
@@ -16,14 +17,15 @@ use App\Http\Controllers\Cabinet\Banners\BannerController;
 use App\Http\Controllers\Cabinet\DialogController;
 use App\Http\Controllers\Cabinet\FavoriteController;
 use App\Http\Controllers\Cabinet\TicketController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -34,10 +36,22 @@ Route::get('banners/{banner}/go', BannerClickController::class)->name('banners.c
 
 Route::get('pages/{page:slug}', [PageController::class, 'show'])->name('pages.show');
 
+// Social login (web session)
+Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+    ->name('auth.social.redirect');
+Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])
+    ->name('auth.social.callback');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Phone verification (web)
+    Route::post('/profile/phone/request', [ProfileController::class, 'requestPhoneVerification'])
+        ->name('profile.phone.request');
+    Route::post('/profile/phone/verify', [ProfileController::class, 'verifyPhone'])
+        ->name('profile.phone.verify');
 });
 
 Route::middleware('auth')->prefix('cabinet')->name('cabinet.')->group(function () {
@@ -69,7 +83,6 @@ Route::middleware(['auth', 'moderator'])->prefix('admin')->name('admin.')->group
     Route::post('moderation/{advert}/reject', [ModerationController::class, 'reject'])->name('moderation.reject');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::resource('users', UsersController::class)->only(['index', 'edit', 'update', 'destroy']);
 
     Route::resource('tickets', AdminTicketController::class)->only(['index', 'show']);
     Route::post('tickets/{ticket}/messages', [AdminTicketController::class, 'addMessage'])->name('tickets.messages.store');
@@ -82,7 +95,13 @@ Route::middleware(['auth', 'moderator'])->prefix('admin')->name('admin.')->group
     Route::resource('pages', AdminPageController::class)->except(['show']);
 });
 
+// Admin-only (users + regions)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('regions', RegionController::class)->except(['show']);
+    Route::resource('users', UsersController::class)->only(['index', 'edit', 'update', 'destroy']);
+    Route::post('users/{user}/activate', [UsersController::class, 'activate'])->name('users.activate');
+    Route::post('users/{user}/suspend', [UsersController::class, 'suspend'])->name('users.suspend');
+    Route::post('users/{user}/unsuspend', [UsersController::class, 'unsuspend'])->name('users.unsuspend');
 });
+
 require __DIR__ . '/auth.php';

@@ -1,38 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Home') }}
-            </h2>
-
-            <nav class="flex items-center gap-4">
-                @auth
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                        Dashboard
-                    </a>
-                @else
-                    <a
-                        href="{{ route('login') }}"
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-transparent rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                        Log in
-                    </a>
-
-                    @if (Route::has('register'))
-                        <a
-                            href="{{ route('register') }}"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                        >
-                            Register
-                        </a>
-                    @endif
-                @endauth
-            </nav>
-        </div>
-    </x-slot>
 
     {{ Breadcrumbs::render('home') }}
 

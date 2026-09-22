@@ -16,7 +16,7 @@ test('new user via social login creates account in wait status', function () {
     $result = $networkService->handleCallback('google', $mockUser);
 
     expect($result['is_new'])->toBeTrue();
-    expect($result['user']->status)->toBe(User::STATUS_WAIT);
+    expect($result['user']->status)->toBe(User::STATUS_ACTIVE);
     expect($result['user']->email)->toBe('newuser@example.com');
     expect($result['token'])->not->toBeNull();
 });

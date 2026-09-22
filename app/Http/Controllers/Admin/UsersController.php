@@ -31,9 +31,14 @@ class UsersController extends Controller
             $query->where('role', $value);
         }
 
+        if ($value = $request->string('status')->toString()) {
+            $query->where('status', $value);
+        }
+
         return view('admin.users.index', [
             'users' => $query->paginate(20)->withQueryString(),
             'roles' => User::rolesList(),
+            'statuses' => User::statusesList(),
         ]);
     }
 
@@ -42,6 +47,7 @@ class UsersController extends Controller
         return view('admin.users.edit', [
             'user' => $user,
             'roles' => User::rolesList(),
+            'statuses' => User::statusesList(),
             'canChangeRole' => request()->user()->isAdmin() && request()->user()->isNot($user),
         ]);
     }
@@ -54,15 +60,55 @@ class UsersController extends Controller
             $data['role'] = $request->validated('role');
         }
         $user->update($data);
-        return redirect()->route('admin.users.index')->with('status', "Foydalanuvchi yangilandi.");
+        return redirect()->route('admin.users.index')->with('status', 'Foydalanuvchi yangilandi.');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
-        abort_if($request->user()->is($user), 403, "O'zingizni o'chira olmaysiz. прикинь :)");
+        abort_if($request->user()->is($user), 403, "O'zingizni o'chira olmaysiz.");
         abort_unless($request->user()->isAdmin(), 403);
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('status', "Foydalanuvchi o`chirildi.");
+        return redirect()->route('admin.users.index')->with('status', "Foydalanuvchi o'chirildi.");
+    }
+
+    public function activate(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+
+        try {
+            $user->activate();
+        } catch (\DomainException $e) {
+            return redirect()->route('admin.users.index')->withErrors(['status' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.users.index')->with('status', 'Foydalanuvchi faollashtirildi.');
+    }
+
+    public function suspend(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        abort_if($request->user()->is($user), 403, "O'zingizni bloklay olmaysiz.");
+
+        try {
+            $user->suspend();
+        } catch (\DomainException $e) {
+            return redirect()->route('admin.users.index')->withErrors(['status' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.users.index')->with('status', 'Foydalanuvchi bloklandi.');
+    }
+
+    public function unsuspend(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+
+        try {
+            $user->unsuspend();
+        } catch (\DomainException $e) {
+            return redirect()->route('admin.users.index')->withErrors(['status' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.users.index')->with('status', 'Bloklash bekor qilindi.');
     }
 }

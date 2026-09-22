@@ -29,7 +29,7 @@ test('registration fails with a duplicate email', function () {
 });
 
 test('a user can login with correct credentials', function () {
-    $user = User::factory()->create(['password' => Hash::make('password123')]);
+    $user = User::factory()->active()->create(['password' => Hash::make('password123')]);
 
     $response = $this->postJson(route('api.login'), [
         'email' => $user->email,

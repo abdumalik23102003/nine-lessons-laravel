@@ -1,4 +1,4 @@
-@php use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
+@php use App\Models\Banner;use Diglactic\Breadcrumbs\Breadcrumbs; @endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -9,7 +9,7 @@
         </div>
     </x-slot>
 
-    {{ Breadcrumbs::render('cabinet.tickets.index') }}
+    {{ Breadcrumbs::render('cabinet.banners.index') }}
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-4">
@@ -27,8 +27,8 @@
                     <div class="flex-1">
                         <div class="font-medium text-gray-900 dark:text-gray-100">{{ $banner->name }}</div>
                         <div class="text-sm text-gray-500">
-                            {{ \App\Models\Banner::statusesList()[$banner->status] ?? $banner->status }}
-                            @if ($banner->status === \App\Models\Banner::STATUS_ACTIVE)
+                            {{ Banner::statusesList()[$banner->status] ?? $banner->status }}
+                            @if ($banner->status === Banner::STATUS_ACTIVE)
                                 · {{ __('Ko\'rishlar') }}: {{ $banner->views }} · {{ __('Bosishlar') }}
                                 : {{ $banner->clicks }}
                             @endif

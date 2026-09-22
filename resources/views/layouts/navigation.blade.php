@@ -10,43 +10,40 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links (Desktop) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('adverts.index')" :active="request()->routeIs('adverts.*')">
                         {{ __("E'lonlar") }}
                     </x-nav-link>
 
                     @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('cabinet.adverts.index')" :active="request()->routeIs('cabinet.adverts.*')">
-                            {{ __("Mening e'lonlarim") }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('cabinet.tickets.index')" :active="request()->routeIs('cabinet.tickets.*')">
-                            {{ __("Murojaatlar") }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('cabinet.favorites.index')" :active="request()->routeIs('cabinet.favorites.*')">
-                            {{ __("Sevimlilar") }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('cabinet.banners.index')" :active="request()->routeIs('cabinet.banners.*')">
-                            {{ __("Bannerlarim") }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('cabinet.dialogs.index')" :active="request()->routeIs('cabinet.dialogs.*')">
-                            {{ __("Xabarlar") }}
-                        </x-nav-link>
-                        <x-dropdown-link :href="route('admin.pages.index')">{{ __('Sahifalar') }}</x-dropdown-link>
+                        {{-- Kabinet (barcha autentifikatsiya qilingan foydalanuvchilar) --}}
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button type="button" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 focus:outline-none transition duration-150 ease-in-out
+                                    {{ request()->routeIs('cabinet.*') || request()->routeIs('dashboard') ? 'border-indigo-400 text-gray-900 dark:text-gray-100' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
+                                    {{ __('Kabinet') }}
+                                    <svg class="ms-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('dashboard')">{{ __('Dashboard') }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('cabinet.adverts.index')">{{ __("Mening e'lonlarim") }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('cabinet.favorites.index')">{{ __('Sevimlilar') }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('cabinet.dialogs.index')">{{ __('Xabarlar') }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('cabinet.banners.index')">{{ __('Bannerlarim') }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('cabinet.tickets.index')">{{ __('Murojaatlar') }}</x-dropdown-link>
+                            </x-slot>
+                        </x-dropdown>
 
                         @if (auth()->user()->canModerate())
+                            {{-- Boshqaruv (moderator + admin) --}}
                             <x-dropdown align="left" width="56">
                                 <x-slot name="trigger">
                                     <button type="button" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 focus:outline-none transition duration-150 ease-in-out
-                                        {{ request()->routeIs('admin.*') ? 'border-indigo-400 text-gray-900 dark:text-gray-100' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                                        {{ request()->routeIs('admin.*') ? 'border-indigo-400 text-gray-900 dark:text-gray-100' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300' }}">
                                         {{ __('Boshqaruv') }}
                                         <svg class="ms-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -54,10 +51,11 @@
                                     </button>
                                 </x-slot>
                                 <x-slot name="content">
-                                    <x-dropdown-link :href="route('admin.moderation.index')">{{ __('E\'lonlar moderatsiyasi') }}</x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.moderation.index')">{{ __("E'lonlar moderatsiyasi") }}</x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.banners.moderation.index')">{{ __('Bannerlar moderatsiyasi') }}</x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.categories.index')">{{ __('Kategoriyalar') }}</x-dropdown-link>
-                                    <x-dropdown-link :href="route('admin.tickets.index')">{{ __('Murojaatlar') }}</x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.tickets.index')">{{ __('Murojaatlar (admin)') }}</x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.pages.index')">{{ __('Sahifalar') }}</x-dropdown-link>
                                     @if (auth()->user()->isAdmin())
                                         <x-dropdown-link :href="route('admin.regions.index')">{{ __('Hududlar') }}</x-dropdown-link>
                                         <x-dropdown-link :href="route('admin.users.index')">{{ __('Foydalanuvchilar') }}</x-dropdown-link>
@@ -69,23 +67,21 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
+            <!-- Settings Dropdown (Desktop) -->
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
                 @auth
                     <a href="{{ route('cabinet.adverts.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         {{ __("+ Yangi e'lon") }}
                     </a>
-                @endauth
-                @auth
+
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button
                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                                 <div>{{ Auth::user()->name }}</div>
                                 <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 20 20">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                               d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                               clip-rule="evenodd"/>
@@ -95,22 +91,22 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('Profil') }}
                             </x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
                                                  onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('Chiqish') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
                     </x-dropdown>
                 @else
                     <a href="{{ route('login') }}"
-                       class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 mr-4">{{ __('Log in') }}</a>
+                       class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 mr-4">{{ __('Kirish') }}</a>
                     <a href="{{ route('register') }}"
-                       class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">{{ __('Register') }}</a>
+                       class="text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">{{ __('Ro\'yxatdan o\'tish') }}</a>
                 @endauth
             </div>
 
@@ -141,27 +137,30 @@
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
-
                 <x-responsive-nav-link :href="route('cabinet.adverts.index')" :active="request()->routeIs('cabinet.adverts.*')">
                     {{ __("Mening e'lonlarim") }}
                 </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('cabinet.tickets.index')" :active="request()->routeIs('cabinet.tickets.*')">
-                    {{ __("Murojaatlar") }}
+                <x-responsive-nav-link :href="route('cabinet.favorites.index')" :active="request()->routeIs('cabinet.favorites.*')">
+                    {{ __('Sevimlilar') }}
                 </x-responsive-nav-link>
-
+                <x-responsive-nav-link :href="route('cabinet.dialogs.index')" :active="request()->routeIs('cabinet.dialogs.*')">
+                    {{ __('Xabarlar') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('cabinet.banners.index')" :active="request()->routeIs('cabinet.banners.*')">
-                    {{ __("Bannerlarim") }}
+                    {{ __('Bannerlarim') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('cabinet.tickets.index')" :active="request()->routeIs('cabinet.tickets.*')">
+                    {{ __('Murojaatlar') }}
                 </x-responsive-nav-link>
 
                 @if (auth()->user()->canModerate())
+                    <div class="pt-2 pb-1 border-t border-gray-200 dark:border-gray-600">
+                        <div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ __('Boshqaruv') }}</div>
+                    </div>
                     <x-responsive-nav-link :href="route('admin.moderation.index')" :active="request()->routeIs('admin.moderation.*')">
                         {{ __("E'lonlar moderatsiyasi") }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('cabinet.favorites.index')" :active="request()->routeIs('cabinet.favorites.*')">
-                        {{ __("Sevimlilar") }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.banners.moderation.index')" :active="request()->routeIs('admin.banners.*')">
+                    <x-responsive-nav-link :href="route('admin.banners.moderation.index')" :active="request()->routeIs('admin.banners.moderation.*')">
                         {{ __('Bannerlar moderatsiyasi') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')">
@@ -195,25 +194,22 @@
 
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
+                        {{ __('Profil') }}
                     </x-responsive-nav-link>
 
-                    <!-- Authentication -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-
                         <x-responsive-nav-link :href="route('logout')"
-                                               onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
+                                               onclick="event.preventDefault(); this.closest('form').submit();">
+                            {{ __('Chiqish') }}
                         </x-responsive-nav-link>
                     </form>
                 </div>
             </div>
         @else
             <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600 px-4 space-y-1">
-                <x-responsive-nav-link :href="route('login')">{{ __('Log in') }}</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('register')">{{ __('Register') }}</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('login')">{{ __('Kirish') }}</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('register')">{{ __("Ro'yxatdan o'tish") }}</x-responsive-nav-link>
             </div>
         @endauth
     </div>

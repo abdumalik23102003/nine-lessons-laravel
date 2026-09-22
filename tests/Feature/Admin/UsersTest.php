@@ -8,25 +8,31 @@ test('a regular user cannot access user management', function () {
     $this->actingAs($user)->get(route('admin.users.index'))->assertForbidden();
 });
 
-test('a moderator can view users but cannot change roles', function () {
-    $moderator = User::factory()->moderator()->create();
-    $target = User::factory()->create(['name' => 'Old Name']);
+test('a moderator cannot access user management', function () {
+    $moderator = User::factory()->moderator()->active()->create();
 
     $this->actingAs($moderator)
         ->get(route('admin.users.index'))
+        ->assertForbidden();
+});
+
+test('an admin can view and update users', function () {
+    $admin = User::factory()->admin()->active()->create();
+    $target = User::factory()->active()->create(['name' => 'Old Name']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.index'))
         ->assertOk();
 
-    $this->actingAs($moderator)
+    $this->actingAs($admin)
         ->put(route('admin.users.update', $target), [
             'name' => 'New Name',
             'email' => $target->email,
-            'role' => User::ROLE_ADMIN,
+            'role' => User::ROLE_USER,
         ])
         ->assertRedirect(route('admin.users.index'));
 
-    expect($target->fresh())
-        ->name->toBe('New Name')
-        ->role->toBe(User::ROLE_USER);
+    expect($target->fresh()->name)->toBe('New Name');
 });
 
 test('an admin can change another users role', function () {
